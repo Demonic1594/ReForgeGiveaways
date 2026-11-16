@@ -107,6 +107,12 @@ export class ReForgeGiveaways extends ForgeExtension {
             log.level = o.logLevel
         }
         o.useDefault ??= true
+        // Custom messages are sent by a giveawayStart command: without the event no giveaway could start.
+        // Checked here, where an option error stops the bot at start-up; thrown from init() it ended the
+        // process later as an unhandled rejection.
+        if (!o.useDefault && !o.events?.includes("giveawayStart")) {
+            throw new Error(`[ReForgeGiveaways] ${GiveawaysErrorType.MissingStartEvent}: with useDefault: false, add "giveawayStart" to events and load a giveawayStart command`)
+        }
         o.useReactions ??= false
         o.emoji ||= "🎉"
         o.buttonLabel ||= "Join"
@@ -161,9 +167,6 @@ export class ReForgeGiveaways extends ForgeExtension {
         }
 
         if (this.options.events?.length) client.events.load("ReForgeGiveawaysEvents", this.options.events)
-        if (!this.options.useDefault && !this.options.events?.includes("giveawayStart")) {
-            throw new Error(GiveawaysErrorType.MissingStartEvent)
-        }
 
         // With several processes (sharding), each one only looks after the
         // giveaways of its own guilds; otherwise every process would draw

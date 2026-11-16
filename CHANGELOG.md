@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.1 (November 2026)
+
+Tag [`v2.3.1`](https://github.com/Demonic1594/ReForgeGiveaways/releases/tag/v2.3.1) · [all changes since 2.3.0](https://github.com/Demonic1594/ReForgeGiveaways/compare/v2.3.0...v2.3.1)
+
+One fix found in an audit. Nothing to change in your bot.
+
+### Fixed
+- **`useDefault: false` without `"giveawayStart"` in `events` crashed the bot after start-up.** The check ran in `init()`, which ForgeScript does not wait for: the error became an unhandled rejection that ended the process with a bare stack trace and no `[ReForgeGiveaways]` prefix. The constructor checks it now, so the bot stops while it is created, with `[ReForgeGiveaways] The giveawayStart event must be defined ...: with useDefault: false, add "giveawayStart" to events and load a giveawayStart command`. Two tests in `test/regression.test.js` fail on 2.3.0.
+
+### Changed
+- Tests run against ReForgeDB v3.2.0 (was v3.1.0). Releases for every tag can be published from the Actions tab (`release.yml` by hand).
+
 ## 2.3.0 (November 2026)
 
 Tag [`v2.3.0`](https://github.com/Demonic1594/ReForgeGiveaways/releases/tag/v2.3.0) · [all changes since 2.2.1](https://github.com/Demonic1594/ReForgeGiveaways/compare/v2.2.1...v2.3.0) · [upgrade notes](README.md#from-221-to-230)

@@ -72,7 +72,7 @@ Found while stress-testing the rework, and fixed: joins that cost O(n) each (a m
     Using the original ForgeDB instead: `npm i github:Demonic1594/ReForgeGiveaways @tryforge/forge.db`.
 
     > ℹ️ **Note**\
-    > The compiled code is committed, so no build step is needed. The command above follows `main`; to pin a release, add its tag, e.g. `npm i github:Demonic1594/ReForgeGiveaways#v2.3.0`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeGiveaways/tags).
+    > The compiled code is committed, so no build step is needed. The command above follows `main`; to pin a release, add its tag, e.g. `npm i github:Demonic1594/ReForgeGiveaways#v2.3.1`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeGiveaways/tags).
 
 2. Here's an example of how your main file should look:
     ```js
@@ -406,7 +406,7 @@ Everything about a giveaway lives in the database, so the bot can stop at any mo
 Install the new release over the old one; there is nothing to migrate by hand. On the first start the database is upgraded in place, and only nullable columns are ever added, so your giveaways and entries are kept.
 
 ```bash
-npm i github:Demonic1594/ReForgeGiveaways#v2.3.0
+npm i github:Demonic1594/ReForgeGiveaways#v2.3.1
 ```
 
 #### From 2.2.1 to 2.3.0
