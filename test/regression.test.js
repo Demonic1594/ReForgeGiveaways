@@ -372,3 +372,31 @@ test("a command can only start giveaways in channels of its own guild", () => {
     assert.equal(canStartIn(none, "2"), true, "giveaway and ready events pick their own channel")
     assert.equal(canStartIn({ ...none, message: { guildId: null }, user: {} }, "2"), true, "a DM command")
 })
+
+// 2.3.1: useDefault: false without "giveawayStart" in events is an option error, thrown by the constructor
+// (prefixed), not from init(), where it ended the bot later as an unhandled rejection with a bare stack trace.
+test("useDefault: false without the giveawayStart event stops the bot at start-up with a clear error", () => {
+    const { ReForgeGiveaways } = require("..")
+    assert.throws(() => new ReForgeGiveaways({ useDefault: false }), /^Error: \[ReForgeGiveaways\] The giveawayStart event must be defined.*add "giveawayStart" to events/)
+    assert.throws(() => new ReForgeGiveaways({ useDefault: false, events: ["giveawayEnd"] }), /\[ReForgeGiveaways\]/)
+    assert.doesNotThrow(() => new ReForgeGiveaways({ useDefault: false, events: ["giveawayStart"] }))
+    assert.doesNotThrow(() => new ReForgeGiveaways({ useDefault: true }))
+})
+
+test("a bot with that mistake fails while it is created, not with an unhandled rejection afterwards", () => {
+    const { spawnSync } = require("child_process")
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fg-start-"))
+    const script = `
+        process.chdir(${JSON.stringify(dir)})
+        const { ForgeClient } = require("@tryforge/forgescript")
+        const { ReForgeDB } = require("@tryforge/reforge.db")
+        const { ReForgeGiveaways } = require(${JSON.stringify(path.join(__dirname, ".."))})
+        process.on("unhandledRejection", (e) => { console.log("UNHANDLED " + e.message); process.exit(3) })
+        try {
+            new ForgeClient({ intents: ["Guilds"], events: [], extensions: [new ReForgeDB({ type: "better-sqlite3", logLevel: "silent" }), new ReForgeGiveaways({ useDefault: false })] })
+        } catch (e) { console.log("THROWN " + e.message); process.exit(2) }
+        setTimeout(() => { console.log("STARTED"); process.exit(0) }, 1500)`
+    const r = spawnSync(process.execPath, ["-e", script], { encoding: "utf8", timeout: 20000 })
+    assert.equal(r.status, 2, r.stdout + r.stderr)
+    assert.match(r.stdout, /^THROWN \[ReForgeGiveaways\] The giveawayStart event must be defined/)
+})
