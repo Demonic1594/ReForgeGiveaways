@@ -52,6 +52,8 @@ jobs:
       - run: npm i --no-save @tryforge/forgescript@2.5.0
       - run: npm test
 
+  # Every database the extensions support, with each of them. The single-process test files run against
+  # the server, each in its own database.
   postgres:
     name: postgres (${{ matrix.extension }})
     runs-on: ubuntu-latest
@@ -89,5 +91,78 @@ jobs:
           for file in regression adversarial custom hardening; do
             psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE gw_$file"
             GIVEAWAYS_TEST_DB="{\"type\":\"postgres\",\"host\":\"127.0.0.1\",\"username\":\"postgres\",\"password\":\"postgres\",\"database\":\"gw_$file\"}" \
+              node --test "test/$file.test.js"
+          done
+
+  mysql:
+    name: ${{ matrix.server.name }} (${{ matrix.extension }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extension: [reforge.db, forge.db]
+        server:
+          - { name: mysql, image: "mysql:8.4", health: "mysqladmin ping -h 127.0.0.1 -proot" }
+          - { name: mariadb, image: "mariadb:10.11", health: "healthcheck.sh --connect --innodb_initialized" }
+    env:
+      GIVEAWAYS_TEST_DB_EXTENSION: ${{ matrix.extension }}
+    services:
+      db:
+        image: ${{ matrix.server.image }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "${{ matrix.server.health }}"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm i --no-save mysql2
+      - run: npm run build
+      # type "mysql" for both: ReForgeDB and ForgeDB detect MariaDB themselves.
+      - name: Run the single-process test files against ${{ matrix.server.name }}
+        run: |
+          for file in regression adversarial custom hardening; do
+            mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE gw_$file CHARACTER SET utf8mb4"
+            GIVEAWAYS_TEST_DB="{\"type\":\"mysql\",\"host\":\"127.0.0.1\",\"username\":\"root\",\"password\":\"root\",\"database\":\"gw_$file\"}" \
+              node --test "test/$file.test.js"
+          done
+
+  mongodb:
+    name: mongodb (${{ matrix.extension }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extension: [reforge.db, forge.db]
+    env:
+      GIVEAWAYS_TEST_DB_EXTENSION: ${{ matrix.extension }}
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm i --no-save mongodb@6
+      - run: npm run build
+      - name: Run the single-process test files against MongoDB
+        run: |
+          for file in regression adversarial custom hardening; do
+            GIVEAWAYS_TEST_DB="{\"type\":\"mongodb\",\"url\":\"mongodb://127.0.0.1:27017/gw_$file\"}" \
               node --test "test/$file.test.js"
           done
