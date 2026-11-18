@@ -14,7 +14,7 @@ const { Database, GiveawayDenyReason, GiveawaysInteractionHandler, DEFAULT_MESSA
 
 let h
 before(async () => { h = await boot(fs.mkdtempSync(path.join(os.tmpdir(), "fg-adv-"))) })
-after(async () => { await h.manager.destroy() })
+after(async () => { await h.close() })
 
 const base = (extra = {}) => ({ prize: "Prize", duration: 30 * DAY, winnersCount: 1, hostID: snow(), guildID: h.guild.id, channelID: h.channel.id, ...extra })
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))

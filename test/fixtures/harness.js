@@ -110,7 +110,18 @@ async function boot(dir, options = {}) {
     manager.getGuild = async () => guild
     manager.fetchMessage = async (_c, id) => messages.get(id)
 
-    return { emitted, client, giveaways, manager, sent, deleted, messages, addMember, members, guild, channel, dir, setGuildState: (v) => { guildState = v } }
+    // Stops the manager and closes both connections (the giveaways database and the extension's).
+    // MySQL and MongoDB pools keep the process alive until they are closed; SQLite and PostgreSQL do not.
+    const close = async () => {
+        await manager.destroy()
+        const { Database } = require("../..")
+        if (Database.db?.isInitialized) await Database.db.destroy()
+        const ext = client.db
+        if (typeof ext?.close === "function") await ext.close()
+        else if (ext?.db?.isInitialized) await ext.db.destroy()
+    }
+
+    return { close, emitted, client, giveaways, manager, sent, deleted, messages, addMember, members, guild, channel, dir, setGuildState: (v) => { guildState = v } }
 }
 
 module.exports = { boot, snow, DAY, DB_EXTENSION, databaseExtension, database, dbFile: (dir) => path.join(dir, "giveaways.db") }

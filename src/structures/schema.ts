@@ -100,10 +100,24 @@ export function createGiveawaySchema(driver: DriverKind) {
         tableName: mongo ? "mongo_giveaway" : "giveaway",
         target: mongo ? MongoGiveaway : Giveaway,
         columns: columns(driver) as any,
-        indices: [
-            { name: "IDX_giveaway_message", columns: ["messageID"] },
-            { name: "IDX_giveaway_guild_ended", columns: ["guildID", "hasEnded"] },
-            ...(mongo ? [{ name: "IDX_giveaway_id", columns: ["id"], unique: true }] : []),
-        ],
+        // MongoDB: see MONGO_INDEXES.
+        indices: mongo
+            ? []
+            : [
+                  { name: "IDX_giveaway_message", columns: ["messageID"] },
+                  { name: "IDX_giveaway_guild_ended", columns: ["guildID", "hasEnded"] },
+              ],
     })
 }
+
+/**
+ * The MongoDB indexes, created by `Database.init` after connecting. They are not in the schema
+ * because TypeORM sends the index options it has no value for (`sparse`, `background`) as null,
+ * which MongoDB 7 refuses ("not convertible to bool"), so the connection never succeeded.
+ * Same names as before: creating an index that already exists does nothing.
+ */
+export const MONGO_INDEXES = [
+    { name: "IDX_giveaway_message", key: { messageID: 1 } },
+    { name: "IDX_giveaway_guild_ended", key: { guildID: 1, hasEnded: 1 } },
+    { name: "IDX_giveaway_id", key: { id: 1 }, unique: true },
+] as const

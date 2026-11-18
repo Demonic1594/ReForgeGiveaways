@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.2 (November 2026)
+
+Tag [`v2.3.2`](https://github.com/Demonic1594/ReForgeGiveaways/releases/tag/v2.3.2) · [all changes since 2.3.1](https://github.com/Demonic1594/ReForgeGiveaways/compare/v2.3.1...v2.3.2)
+
+Found by running the tests against live MySQL, MariaDB and MongoDB servers for the first time. Nothing to change in your bot.
+
+### Fixed
+- **ReForgeGiveaways could not connect to MongoDB 7.** TypeORM sent the index options it had no value for (`sparse`, `background`) as `null`, MongoDB refused the index (`not convertible to bool`), and the connection was retried for ever: no giveaway ever started. On MongoDB the indexes are now created after connecting, with the same names, so indexes that already exist are left as they are. `test/mongodb.test.js` fails on 2.3.1 (it runs in the MongoDB CI job and is skipped elsewhere).
+
+### Changed
+- CI runs the single-process test files against MySQL 8.4, MariaDB 10.11 and MongoDB 7, each with ReForgeDB and with ForgeDB, next to SQLite and PostgreSQL. The test harness closes both database connections when a file finishes (MySQL and MongoDB pools otherwise keep the process alive), and the server database jobs time out after 15 minutes instead of hanging.
+
 ## 2.3.1 (November 2026)
 
 Tag [`v2.3.1`](https://github.com/Demonic1594/ReForgeGiveaways/releases/tag/v2.3.1) · [all changes since 2.3.0](https://github.com/Demonic1594/ReForgeGiveaways/compare/v2.3.0...v2.3.1)

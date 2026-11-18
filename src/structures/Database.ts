@@ -4,7 +4,7 @@ import { TypedEmitter } from "tiny-typed-emitter"
 import { Snowflake } from "discord.js"
 import { DataSource, EntitySchema, In, Repository } from "typeorm"
 import { Giveaway, IGiveaway, MongoGiveaway } from "./Giveaway"
-import { createGiveawaySchema, DriverKind } from "./schema"
+import { createGiveawaySchema, DriverKind, MONGO_INDEXES } from "./schema"
 
 export type AnyGiveaway = typeof Giveaway | typeof MongoGiveaway
 export type IGiveawayFindOptions = Partial<Omit<IGiveaway, "entries" | "winners" | "previousWinners" | "requirements" | "bonusEntries" | "display">>
@@ -85,6 +85,7 @@ export class Database {
         Database.driver = driverOf(Database.db.options.type)
         Database.schema = schemas[Database.driver]
         Database.entities = { Giveaway: Database.driver === "mongodb" ? MongoGiveaway : Giveaway }
+        if (Database.driver === "mongodb") await Database.db.mongoManager.createCollectionIndexes(Database.schema, MONGO_INDEXES.map((i) => ({ ...i, key: { ...i.key } })))
         await Database.loadActive()
         Database.emitter.emit("databaseConnect")
     }

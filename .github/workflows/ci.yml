@@ -57,6 +57,8 @@ jobs:
   postgres:
     name: postgres (${{ matrix.extension }})
     runs-on: ubuntu-latest
+    # A database connection left open keeps the test process alive: fail instead of hanging.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -97,6 +99,8 @@ jobs:
   mysql:
     name: ${{ matrix.server.name }} (${{ matrix.extension }})
     runs-on: ubuntu-latest
+    # A database connection left open keeps the test process alive: fail instead of hanging.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -140,6 +144,8 @@ jobs:
   mongodb:
     name: mongodb (${{ matrix.extension }})
     runs-on: ubuntu-latest
+    # A database connection left open keeps the test process alive: fail instead of hanging.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -162,7 +168,7 @@ jobs:
       - run: npm run build
       - name: Run the single-process test files against MongoDB
         run: |
-          for file in regression adversarial custom hardening; do
+          for file in regression adversarial custom hardening mongodb; do
             GIVEAWAYS_TEST_DB="{\"type\":\"mongodb\",\"url\":\"mongodb://127.0.0.1:27017/gw_$file\"}" \
               node --test "test/$file.test.js"
           done
