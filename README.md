@@ -72,7 +72,7 @@ Found while stress-testing the rework, and fixed: joins that cost O(n) each (a m
     Using the original ForgeDB instead: `npm i github:Demonic1594/ReForgeGiveaways @tryforge/forge.db`.
 
     > ℹ️ **Note**\
-    > The compiled code is committed, so no build step is needed. The command above follows `main`; to pin a release, add its tag, e.g. `npm i github:Demonic1594/ReForgeGiveaways#v2.3.1`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeGiveaways/tags).
+    > The compiled code is committed, so no build step is needed. The command above follows `main`; to pin a release, add its tag, e.g. `npm i github:Demonic1594/ReForgeGiveaways#v2.3.2`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeGiveaways/tags).
 
 2. Here's an example of how your main file should look:
     ```js
@@ -406,7 +406,7 @@ Everything about a giveaway lives in the database, so the bot can stop at any mo
 Install the new release over the old one; there is nothing to migrate by hand. On the first start the database is upgraded in place, and only nullable columns are ever added, so your giveaways and entries are kept.
 
 ```bash
-npm i github:Demonic1594/ReForgeGiveaways#v2.3.1
+npm i github:Demonic1594/ReForgeGiveaways#v2.3.2
 ```
 
 #### From 2.2.1 to 2.3.0
@@ -444,7 +444,7 @@ New in 2.1.0: `$rerollGiveawayWinner`, `$clearGiveawayRequirements`, `$clearBonu
 - Entries of an ended giveaway can't be changed; they are the record the winners were drawn from.
 - In reaction mode, entries added with `$addGiveawayEntry` are kept even though they have no reaction.
 - Giveaways must end before the year 10000, the latest date Discord can display.
-- SQLite and PostgreSQL are tested. MySQL and MongoDB follow the same code paths but have not been tested against a live server.
+- Tested in CI against live SQLite, PostgreSQL, MySQL 8.4, MariaDB 10.11 and MongoDB 7, each with ReForgeDB and with ForgeDB. Before 2.3.2, ReForgeGiveaways could not connect to MongoDB 7 at all.
 - `$startGiveaway` only posts in channels of the server the command runs in. Contexts without a server (giveaway events, `ready`, direct messages) can pick any channel, so keep commands that take a channel from user input in a server.
 
 <h3 align="center">Development</h3><hr>

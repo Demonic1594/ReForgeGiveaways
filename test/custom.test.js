@@ -20,7 +20,7 @@ before(async () => {
 })
 after(async () => {
     process.off("unhandledRejection", onUnhandled)
-    await h.manager.destroy()
+    await h.close()
 })
 
 const base = (extra = {}) => ({ prize: "Prize", duration: DAY, winnersCount: 1, hostID: snow(), guildID: h.guild.id, channelID: h.channel.id, ...extra })

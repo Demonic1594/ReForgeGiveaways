@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MONGO_INDEXES = void 0;
 exports.createGiveawaySchema = createGiveawaySchema;
 const typeorm_1 = require("typeorm");
 const Giveaway_1 = require("./Giveaway");
@@ -94,11 +95,24 @@ function createGiveawaySchema(driver) {
         tableName: mongo ? "mongo_giveaway" : "giveaway",
         target: mongo ? Giveaway_1.MongoGiveaway : Giveaway_1.Giveaway,
         columns: columns(driver),
-        indices: [
-            { name: "IDX_giveaway_message", columns: ["messageID"] },
-            { name: "IDX_giveaway_guild_ended", columns: ["guildID", "hasEnded"] },
-            ...(mongo ? [{ name: "IDX_giveaway_id", columns: ["id"], unique: true }] : []),
-        ],
+        // MongoDB: see MONGO_INDEXES.
+        indices: mongo
+            ? []
+            : [
+                { name: "IDX_giveaway_message", columns: ["messageID"] },
+                { name: "IDX_giveaway_guild_ended", columns: ["guildID", "hasEnded"] },
+            ],
     });
 }
+/**
+ * The MongoDB indexes, created by `Database.init` after connecting. They are not in the schema
+ * because TypeORM sends the index options it has no value for (`sparse`, `background`) as null,
+ * which MongoDB 7 refuses ("not convertible to bool"), so the connection never succeeded.
+ * Same names as before: creating an index that already exists does nothing.
+ */
+exports.MONGO_INDEXES = [
+    { name: "IDX_giveaway_message", key: { messageID: 1 } },
+    { name: "IDX_giveaway_guild_ended", key: { guildID: 1, hasEnded: 1 } },
+    { name: "IDX_giveaway_id", key: { id: 1 }, unique: true },
+];
 //# sourceMappingURL=schema.js.map

@@ -74,6 +74,8 @@ class Database {
         Database.driver = driverOf(Database.db.options.type);
         Database.schema = schemas[Database.driver];
         Database.entities = { Giveaway: Database.driver === "mongodb" ? Giveaway_1.MongoGiveaway : Giveaway_1.Giveaway };
+        if (Database.driver === "mongodb")
+            await Database.db.mongoManager.createCollectionIndexes(Database.schema, schema_1.MONGO_INDEXES.map((i) => ({ ...i, key: { ...i.key } })));
         await Database.loadActive();
         Database.emitter.emit("databaseConnect");
     }
